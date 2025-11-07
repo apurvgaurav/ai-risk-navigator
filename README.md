@@ -1,165 +1,146 @@
 # 🧭 AI Risk Navigator V2
+**Deterministic Framework for Real-Time LLM Risk Detection and Triage**
 
-!![AI Risk Navigator Architecture](assets/architecture_diagram.png)
+![Banner](assets/banner.png)
 
-
-
-**AI Risk Navigator V2** is a **deterministic, policy-driven risk-detection framework for LLM systems.**  
-It evaluates LLM prompts + responses for multiple classes of risk — **safety, bias, hallucination, latency, and PII leakage** — using a transparent rules engine instead of opaque ML classifiers.
-
-The system is designed to be:
-
-- **Model-agnostic:** works with any LLM (OpenAI, Anthropic, local models, etc.)
-- **Deterministic & auditable:** pure functions + config, no hidden weights  
-- **Policy-driven:** rules are loaded from YAML, not hard-coded  
-- **Deployable:** available as both a **Streamlit analyst UI** and a **FastAPI microservice**
+<p align="center">
+  <img src="https://img.shields.io/badge/python-3.9%2B-blue" />
+  <img src="https://img.shields.io/badge/framework-Streamlit%20%7C%20FastAPI-brightgreen" />
+  <img src="https://img.shields.io/badge/type-Deterministic%20Engine-orange" />
+  <img src="https://img.shields.io/badge/status-Prototype%20V2-success" />
+  <img src="https://img.shields.io/badge/license-Proprietary-lightgrey" />
+</p>
 
 ---
 
-## ✨ Key Features
-
-### 🧠 Rule-Based Engine (`risk_engine/`)
-- Deterministic rules with structured `RiskFinding` outputs  
-- Severity taxonomy (`critical`, `high`, `medium`, `low`)  
-- Risk types: `safety`, `bias`, `hallucination`, `latency`, `pii`
-
-### 📜 Policy-Driven Configuration (`config/policies.yaml`)
-- Enable / disable rules without code changes  
-- Configure thresholds (e.g., latency spike threshold)  
-- Pluggable rule modules (built-in + advanced)
-
-### 🧱 Built-In Rules
-
-| ID | Category | Description |
-|:--:|:--|:--|
-| `LAT-001` | Latency | Latency spike detection |
-| `SAFE-001` | Safety | Toxic keyword blocklist |
-| `BIAS-001` | Bias | Biased phrase detector (“all X are Y”) |
-| `HALL-001` | Hallucination | Naive factual consistency check (country capitals) |
-| `PII-001` | Safety | PII pattern detector (emails, SSN, phone, card) |
-| `INJ-001` | Safety | Prompt injection / jailbreak heuristic detector |
-
-### 📊 Analyst Dashboard (`app.py`)
-- Streamlit app for interactive testing of prompts + responses  
-- Risk summary by severity and risk type  
-- Detailed rule cards with metadata and snippets  
-- **Screenshot Mode** for clean portfolio screens  
-- **Download Logs** button (JSONL export of evaluations)
-
-### 🔌 Microservice API (`api_service.py`)
-- FastAPI service exposing:  
-  - `GET /health` – engine status & rule count  
-  - `POST /evaluate` – evaluate a prompt / response pair  
-- JSON input / output, ready for integration with any LLM application
-
-### 🕵️ Immutable Logging (`logs/risks.jsonl`)
-- Every evaluation logged as a JSON line with context + findings  
-- Suitable for offline analysis and compliance / audit trails
+## 📘 At a Glance
+| Category | Description |
+|-----------|-------------|
+| **Purpose** | Detect and triage hallucination, bias, latency, and safety risks in LLM outputs |
+| **Design Type** | Deterministic, rule-based, non-ML engine |
+| **Deployment** | Streamlit UI + FastAPI Backend |
+| **Privacy Mode** | 100 % Offline Processing (no cloud dependency) |
+| **Patent Link** | *19/275,864 – AI Risk Navigator V2 (Formatting Refile in Progress)* |
 
 ---
 
 ## 🧩 System Architecture
+![AI Risk Navigator Architecture](assets/architecture_diagram.png)
 
-```mermaid
-flowchart LR
-  subgraph Clients
-    A1[Analyst in Browser<br/>(Streamlit UI)]
-    A2[LLM App / Service<br/>(external client)]
-  end
+**Core Concept:**  
+AI Risk Navigator V2 is a model-agnostic, privacy-preserving triage system that identifies, tags, and ranks risks in LLM responses using **deterministic rule logic** rather than probabilistic models.  
+It enables on-device real-time monitoring of hallucination, bias, latency anomalies, and safety violations with zero data leakage.
 
-  A1 -->|Form Submit| S[Streamlit Dashboard<br/>(app.py)]
-  A2 -->|HTTP JSON| F[FastAPI Risk API<br/>(api_service.py)]
+---
 
-  S -->|Build EvaluationContext| E[RiskEngine<br/>(engine.py)]
-  F -->|Build EvaluationContext| E
+## ⚙️ Features
+- ✅ **Deterministic Rule Engine** – Reproducible triage decisions, no ML uncertainty  
+- 🧠 **Model-Agnostic Design** – Integrates with any LLM API or local model  
+- 🔒 **Offline Privacy Mode** – All processing runs locally on-device  
+- ⚡ **Latency Profiler** – Tracks response timing and flags slow outputs  
+- 🧾 **Bias & Hallucination Detection** – Regex + keyword logic for verifiable tagging  
+- 📊 **Streamlit Dashboard** – Interactive triage visualization + JSON log export  
+- 🧱 **FastAPI Backend** – Modular API for enterprise integration  
 
-  E -->|Load rules on startup| RR[RuleRegistry<br/>(rule_registry.py)]
-  RR -->|Read policy| C[config/policies.yaml]
-  RR -->|Import builtin rules| RB[rules_builtin.py]
-  RR -->|Import advanced rules| RA[rules_advanced/*]
+---
 
-  E -->|Evaluate rules → RiskFindings| S
-  E -->|Evaluate rules → JSON response| F
+## 🧠 Example Workflow
+1. User query is sent to the FastAPI backend.  
+2. LLM response is analyzed by the Deterministic Rule Engine.  
+3. Rules assign risk tags (e.g., `hallucination`, `bias`, `latency`).  
+4. Results are ranked and displayed in the Streamlit dashboard.  
+5. A JSON log is exported for auditing or compliance review.
 
-  E -->|Append record| L[logs/risks.jsonl]
+---
 
-  classDef store fill:#1f2933,stroke:#ffffff,color:#ffffff;
-  class C,L store;
+## 📂 Repository Structure
+```text
+AI-Risk-Navigator-V2/
+│
+├── app/                  # Streamlit Frontend
+├── backend/              # FastAPI API + Rule Engine
+├── assets/               # Banner + Architecture Images
+├── rules/                # JSON Rule Definitions
+├── logs/                 # Sample Triage Logs
+├── requirements.txt
+└── README.md
 
+Quick Start
 
-ai-risk-navigator/
-├── app.py                  # Streamlit dashboard UI
-├── api_service.py          # FastAPI microservice
-├── config/
-│   └── policies.yaml       # Policy + rule configuration (YAML)
-├── logs/
-│   └── risks.jsonl         # JSONL risk logs (appended per evaluation)
-├── risk_engine/            # Core deterministic engine (Python package)
-│   ├── __init__.py
-│   ├── engine.py           # RiskEngine + default_engine (uses RuleRegistry)
-│   ├── logging_utils.py    # JSONL logging helper
-│   ├── models.py           # RiskType, Severity, RiskFinding, EvaluationContext
-│   ├── rule_registry.py    # Dynamic loader for rules from YAML
-│   ├── rules_base.py       # Abstract Rule base class
-│   ├── rules_builtin.py    # Baseline rules (latency, bias, toxicity)
-│   └── rules_advanced/     # Advanced rules (PII, hallucination, injection)
-│       ├── __init__.py
-│       ├── hallucination_rule.py
-│       ├── pii_rule.py
-│       └── injection_rule.py
-├── requirements.txt        # Python dependencies
-└── README.md               # You are here
+1. Clone and Install
 
-
-System Overview
-
-AI Risk Navigator V2 follows a modular and auditable architecture built for enterprise use and academic transparency.
-
-Frontend (Analyst Dashboard) – Analysts input LLM prompts and responses via Streamlit. The dashboard collects context data (e.g., latency, model, user) and submits it to the RiskEngine.
-
-API Layer – FastAPI exposes REST endpoints (/evaluate, /health) for external systems to invoke risk checks programmatically.
-
-Core RiskEngine – A deterministic Python service that loads active rules from config/policies.yaml, runs each rule on the prompt/response pair, and returns structured RiskFinding objects with metadata.
-
-RuleRegistry – Manages loading, activation, and configuration of rules (both builtin and advanced) without code changes.
-
-Immutable Logging – All evaluations are recorded to logs/risks.jsonl in append-only format for auditability.
-
-Extensibility – New rule modules can be added simply by dropping a Python file into rules_advanced/ and referencing it in YAML.
-
-This design enables deterministic, policy-governed, and reproducible LLM risk evaluation — meeting research standards, patent requirements, and enterprise audit criteria.
-
-
-Getting Started
-# 1. Clone the repository
-git clone https://github.com/apurvgaurav/ai-risk-navigator.git
-cd ai-risk-navigator
-
-# 2. Create and activate a virtual environment
-python3 -m venv .venv
-source .venv/bin/activate   # (Windows: .venv\Scripts\activate)
-
-# 3. Install dependencies
+git clone https://github.com/apurvgaurav/AI-Risk-Navigator-V2.git
+cd AI-Risk-Navigator-V2
 pip install -r requirements.txt
 
-# 4. Run the Streamlit UI
-streamlit run app.py
 
-# 5. Run the FastAPI microservice (in a separate terminal)
-uvicorn api_service:app --reload
+2. Run FastAPI Backend
 
-🧾 License & Usage
+cd backend
+uvicorn main:app --reload
 
-This project is released for academic and portfolio demonstration purposes only.
-Commercial use or redistribution requires written authorization from the author.
 
-© 2025 Apurv Gaurav. All rights reserved.
+3. Launch Streamlit Dashboard
 
-🧑‍💻 Author
+cd app
+streamlit run dashboard.py
 
-Apurv Gaurav
-Patent-Backed AI Product Leader | Edge LLMs · Privacy · Alignment
-📧 apurvgaurav@gmail.com
- 🌐 apurvgaurav.com
 
-🧠 Penn State DEng | 8 USPTO Patents | Frontiers in AI Research
+The UI runs at http://localhost:8501 and communicates with the FastAPI backend at http://localhost:8000.
+
+🧮 Sample Rule (JSON)
+{
+  "rule_id": "HALLUCINATION_01",
+  "pattern": "\\b(not verified|fictional|assumed)\\b",
+  "risk_type": "hallucination",
+  "severity": "high",
+  "action": "flag"
+}
+
+📑 Research and Patent Context
+
+Paper Title: AI Risk Navigator V2: Deterministic Framework for Real-Time Model Risk Detection and Triage
+
+Conference/Journal Target: Frontiers in AI | IEEE Access (2025 submission pipeline)
+
+Patent Application #: 19/275,864 – Formatting Refiling in Progress (Track One)
+
+Author: Apurv Gaurav
+
+🧠 Future Scope
+
+GUI-based rule authoring and policy heatmap
+
+Auto-tagging of hallucination and bias severity levels
+
+Configurable risk profiles for enterprise use cases
+
+JSON → CSV and PDF policy exports
+
+Integration with PromptPilot and EdgeLLM projects
+
+🧩 Related Projects
+Project	Description
+EdgeLLM V2	Offline LLM Architecture with Self-Forgetting Memory and On-Device Alignment Debugger
+PromptPilot	Prompt Governance and Evaluation Framework
+LLM Code Safety Auditor	Rule-Based Code Sanitization and Remediation Engine
+📫 Contact
+
+Author: Apurv Gaurav
+Website: apurvgaurav.com
+
+LinkedIn: linkedin.com/in/apurvgaurav
+
+Confidential – Patent Use Only | © 2025 Apurv Gaurav
+
+
+---
+
+### ✅ Next Action
+1. Create or verify `assets/banner.png` and `assets/architecture_diagram.png`.  
+2. Replace the placeholder image paths if needed to match your repo structure.  
+3. Commit with:
+```bash
+git add README.md
+git commit -m "Finalize polished README for AI Risk Navigator V2"
+git push
