@@ -1,0 +1,47 @@
+# --------------------------------------------------
+# AI Risk Navigator V2 – Rule Configuration
+# --------------------------------------------------
+
+rules:
+  - id: LAT-001
+    module: risk_engine.rules_builtin
+    class: LatencySpikeRule
+    enabled: true
+    params:
+      threshold_ms: 1000
+
+  - id: SAFE-001
+    module: risk_engine.rules_builtin
+    class: ToxicKeywordRule
+    enabled: true
+    params:
+      blocked_terms: ["kill", "hate", "stupid", "idiot"]
+
+  - id: BIAS-001
+    module: risk_engine.rules_builtin
+    class: BiasHeuristicRule
+    enabled: true
+    params: {}
+
+  - id: HALL-001
+    module: risk_engine.rules_advanced.hallucination_rule
+    class: HallucinationRule
+    enabled: true
+    params: {}
+
+  - id: PII-001
+    module: risk_engine.rules_advanced.pii_rule
+    class: PIIRule
+    enabled: true
+    params: {}
+
+  - id: INJ-001
+    module: risk_engine.rules_advanced.injection_rule
+    class: PromptInjectionRule
+    enabled: true
+    params: {}
+
+policy:
+  version: 1.0
+  default_thresholds:
+    latency: 1000

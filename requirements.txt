@@ -1,0 +1,8 @@
+streamlit
+fastapi
+uvicorn[standard]
+pydantic
+pyyaml
+matplotlib
+pandas
+watchdog

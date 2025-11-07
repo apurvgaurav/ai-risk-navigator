@@ -1,0 +1,19 @@
+# Virtual environment
+.venv/
+venv/
+
+# Python caches
+__pycache__/
+*.pyc
+
+# Logs
+logs/
+*.log
+
+# Streamlit and FastAPI temp files
+.streamlit/
+.DS_Store
+
+# IDE settings
+.vscode/
+.idea/
